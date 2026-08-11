@@ -2,7 +2,77 @@ use erusert::vnpu::VnpuState;
 use erusert::fetcher::{fetch_and_extract, parse_read_command};
 use erusert::setup::{ErusertConfig, LanguageMode};
 use std::fs;
+use erusert::overpanic::{PanicMonitor, PanicCause, OverPanic};
 
+#[test]
+fn overpanic_triggers_on_sustained_high_thermal() {
+    let mut monitor = PanicMonitor::new();
+    let result = monitor.check(93.0, 50, "test digest", None);
+    assert!(result.is_some(), "Should trigger at 93°C");
+    let op = result.unwrap();
+    assert!(matches!(op.cause, PanicCause::ThermalMeltdown(_)));
+}
+
+#[test]
+fn overpanic_does_not_trigger_on_normal_thermal() {
+    let mut monitor = PanicMonitor::new();
+    let result = monitor.check(55.0, 50, "test digest", None);
+    assert!(result.is_none(), "Should NOT trigger at 55°C");
+}
+
+#[test]
+fn overpanic_triggers_on_contradiction_streak() {
+    let mut monitor = PanicMonitor::new();
+
+    // Feed contradictory digests
+    monitor.check(50.0, 50, "Short calm analysis of the topic.", None);
+    monitor.check(50.0, 50, "MASSIVE CHAOTIC UNRELATED WALL OF TEXT THAT CONTRADICTS EVERYTHING PREVIOUSLY SAID ABOUT THIS ENTIRELY DIFFERENT SUBJECT WITH NO RELATION WHATSOEVER TO THE ORIGINAL QUERY AT ALL ABSOLUTELY NOTHING IN COMMON", Some("Short calm analysis of the topic."));
+    monitor.check(50.0, 50, "ANOTHER COMPLETELY DIFFERENT GIGANTIC BLOCK OF TEXT THAT SHARES ZERO WORDS WITH ANYTHING BEFORE IT AND IS ABOUT SOMETHING ELSE ENTIRELY LIKE BANANAS OR SPACECRAFT OR WHATEVER", Some("MASSIVE CHAOTIC UNRELATED WALL OF TEXT"));
+
+    let result = monitor.check(
+        50.0, 50,
+        "YET ANOTHER TOTALLY UNRELATED MASSIVE TEXT BLOCK ABOUT OCEANS OR MOUNTAINS OR SOMETHING THAT HAS ABSOLUTELY NOTHING TO DO WITH PREVIOUS DIGESTS",
+        Some("ANOTHER COMPLETELY DIFFERENT GIGANTIC BLOCK"),
+    );
+
+    assert!(result.is_some(), "3+ contradictions should trigger Over-Panic");
+}
+
+#[test]
+fn overpanic_triggers_on_processing_seizure() {
+    let mut monitor = PanicMonitor::new();
+
+    // Establish baseline
+    for _ in 0..10 {
+        monitor.check(50.0, 50, "normal", None);
+    }
+
+    // Now feed seizure-level processing time
+    let result = monitor.check(50.0, 5000, "seizure test", Some("normal"));
+    assert!(result.is_some(), "10x baseline should trigger seizure panic");
+}
+
+#[test]
+fn overpanic_triggers_on_trust_collapse() {
+    let mut monitor = PanicMonitor::new();
+    for _ in 0..5 {
+        monitor.record_correction();
+    }
+    let result = monitor.check_trust_collapse(50.0);
+    assert!(result.is_some(), "5 corrections should trigger trust collapse");
+}
+
+#[test]
+fn overpanic_halt_returns_err_never_ok() {
+    let op = OverPanic::new(
+        PanicCause::ThermalMeltdown(94.0),
+        94.0,
+        "last digest".to_string(),
+        3,
+    );
+    let result = op.halt();
+    assert!(result.is_err(), "Over-Panic halt must NEVER return Ok");
+}
 
 #[test]
 fn vnpu_low_thermal_produces_calm_digest() {
