@@ -1,0 +1,15 @@
+[package]
+name = "erusert"
+version = "pre-alpha w0.1.0"
+edition = "2021"
+description = "Kernel-level cognitive companion powered by Virtual NPU"
+license = "Apache-2.0"
+
+[dependencies]
+sysinfo = "0.33"
+reqwest = { version = "0.12", features = ["blocking"] }
+scraper = "0.22"
+url = "2.5"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+rand = "0.8"
