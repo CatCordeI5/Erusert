@@ -213,7 +213,7 @@ fn handle_no_context(query: &str, vnpu: &VnpuState, config: &ErusertConfig) {
         vnpu.thermal
     );
     println!();
-    println!("         💡 Give me a link so I can understand:");
+    println!("          Give me a link so I can understand:");
     println!("            [read:https://example.com/page]");
     println!();
     println!("         For custom language, provide 2 links:");
@@ -254,8 +254,8 @@ fn save_panic_log(op: &overpanic::OverPanic) {
     );
 
     match fs::write(&log_path, content) {
-        Ok(_) => eprintln!("  📄 Diagnostic saved to {:?}", log_path),
-        Err(e) => eprintln!("  ⚠ Failed to save diagnostic: {}", e),
+        Ok(_) => eprintln!("   Diagnostic saved to {:?}", log_path),
+        Err(e) => eprintln!("   Failed to save diagnostic: {}", e),
     }
     eprintln!();
 }
