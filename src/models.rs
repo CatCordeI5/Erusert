@@ -2,15 +2,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum EruModel {
-    /// Full Strium - NOT RECOMMENDED. Full system access. Dangerous.
     FullStrium,
-    /// Assistant/Friend - RECOMMENDED. Caring companion mode.
     Assistant,
-    /// Terminal-Eru - For devs who want to edit the model / open-source coding helper.
     TerminalEru,
-    /// Exathry - Fast-lite. Kinda recommended.
     Exathry,
-    /// Avl-Eru - Fastest of all Eru models.
     AvlEru,
 }
 
